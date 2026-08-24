@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.example.comunicaplus.ui.screens.LoginScreen
+import com.example.comunicaplus.navigation.AppNavigation
 import com.example.comunicaplus.ui.theme.ComunicaPlusTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
 
-                    LoginScreen(
+                    AppNavigation(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
