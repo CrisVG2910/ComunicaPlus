@@ -1,4 +1,5 @@
 package com.example.comunicaplus.ui.screens
+import com.example.comunicaplus.model.Usuario
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +38,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
-    onRegisterClick: () -> Unit = {},
+    onRegisterClick: (Usuario) -> Boolean = { false },
     onBackToLoginClick: () -> Unit = {}
 ) {
     var nombre by remember { mutableStateOf("") }
@@ -70,6 +71,10 @@ fun RegisterScreen(
 
     var vibracion by remember {
         mutableStateOf(false)
+    }
+
+    var mensajeError by remember {
+        mutableStateOf<String?>(null)
     }
 
     Column(
@@ -268,10 +273,59 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = onRegisterClick,
+            onClick = {
+
+                mensajeError = when {
+
+                    nombre.isBlank() ||
+                            correo.isBlank() ||
+                            contrasena.isBlank() ||
+                            confirmarContrasena.isBlank() -> {
+                        "Debes completar todos los campos."
+                    }
+
+                    contrasena != confirmarContrasena -> {
+                        "Las contraseñas no coinciden."
+                    }
+
+                    contrasena.length < 4 -> {
+                        "La contraseña debe contener al menos 4 caracteres."
+                    }
+
+                    else -> {
+
+                        val usuario = Usuario(
+                            nombre = nombre.trim(),
+                            correo = correo.trim(),
+                            contrasena = contrasena,
+                            nivelAuditivo = nivelAuditivo,
+                            metodoComunicacion = metodoComunicacion,
+                            textoGrande = textoGrande,
+                            vibracion = vibracion
+                        )
+
+                        val registroCorrecto = onRegisterClick(usuario)
+
+                        if (registroCorrecto) {
+                            null
+                        } else {
+                            "El correo ingresado ya está registrado."
+                        }
+                    }
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Crear cuenta")
+        }
+
+        if (mensajeError != null) {
+
+            Text(
+                text = mensajeError!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         TextButton(

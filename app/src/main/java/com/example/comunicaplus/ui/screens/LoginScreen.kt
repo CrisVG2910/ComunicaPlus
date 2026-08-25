@@ -29,13 +29,17 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    onLoginClick: () -> Unit = {},
+    onLoginClick: (String, String) -> Boolean = { _, _ -> false },
     onRegisterClick: () -> Unit = {},
     onRecoverPasswordClick: () -> Unit = {}
 ) {
     var usuario by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var recordarUsuario by remember { mutableStateOf(false) }
+
+    var credencialesInvalidas by remember {
+        mutableStateOf(false)
+    }
 
     Column(
         modifier = modifier
@@ -104,10 +108,33 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = onLoginClick,
+            onClick = {
+
+                val loginCorrecto = onLoginClick(
+                    usuario,
+                    contrasena
+                )
+
+                credencialesInvalidas = !loginCorrecto
+            },
+            enabled = usuario.isNotBlank() &&
+                    contrasena.isNotBlank(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Iniciar sesión")
+        }
+
+        if (credencialesInvalidas) {
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = "Correo o contraseña incorrectos.",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))

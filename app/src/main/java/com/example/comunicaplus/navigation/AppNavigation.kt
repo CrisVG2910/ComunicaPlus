@@ -2,10 +2,17 @@ package com.example.comunicaplus.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.comunicaplus.data.UsuarioRepository
+import com.example.comunicaplus.model.Usuario
+import com.example.comunicaplus.ui.screens.HomeScreen
 import com.example.comunicaplus.ui.screens.LoginScreen
 import com.example.comunicaplus.ui.screens.RecoverPasswordScreen
 import com.example.comunicaplus.ui.screens.RegisterScreen
@@ -17,44 +24,146 @@ fun AppNavigation(
 
     val navController = rememberNavController()
 
+    var usuarioActual by remember {
+        mutableStateOf<Usuario?>(null)
+    }
+
     NavHost(
         navController = navController,
         startDestination = Routes.LOGIN,
         modifier = modifier.fillMaxSize()
     ) {
 
+        /*
+         * LOGIN
+         */
         composable(Routes.LOGIN) {
 
             LoginScreen(
-                onLoginClick = {
-                    // Implementaremos el login real más adelante.
+
+                onLoginClick = { correo, contrasena ->
+
+                    val usuario = UsuarioRepository
+                        .validarCredenciales(
+                            correo = correo,
+                            contrasena = contrasena
+                        )
+
+                    if (usuario != null) {
+
+                        usuarioActual = usuario
+
+                        navController.navigate(Routes.HOME) {
+
+                            popUpTo(Routes.LOGIN) {
+                                inclusive = true
+                            }
+                        }
+
+                        true
+
+                    } else {
+
+                        false
+                    }
                 },
+
                 onRegisterClick = {
-                    navController.navigate(Routes.REGISTER)
+
+                    navController.navigate(
+                        Routes.REGISTER
+                    )
                 },
+
                 onRecoverPasswordClick = {
-                    navController.navigate(Routes.RECOVER_PASSWORD)
+
+                    navController.navigate(
+                        Routes.RECOVER_PASSWORD
+                    )
                 }
             )
         }
 
+        /*
+         * REGISTRO
+         */
         composable(Routes.REGISTER) {
 
             RegisterScreen(
-                onRegisterClick = {
-                    // En el próximo paso guardaremos el usuario.
+
+                onRegisterClick = { usuario ->
+
+                    val registrado =
+                        UsuarioRepository
+                            .registrarUsuario(usuario)
+
+                    if (registrado) {
+
+                        navController.navigate(
+                            Routes.LOGIN
+                        ) {
+
+                            popUpTo(Routes.REGISTER) {
+                                inclusive = true
+                            }
+                        }
+                    }
+
+                    registrado
                 },
+
                 onBackToLoginClick = {
+
                     navController.popBackStack()
                 }
             )
         }
 
+        /*
+         * RECUPERAR CONTRASEÑA
+         */
         composable(Routes.RECOVER_PASSWORD) {
 
             RecoverPasswordScreen(
+
                 onBackToLoginClick = {
+
                     navController.popBackStack()
+                }
+            )
+        }
+
+        /*
+         * HOME
+         */
+        composable(Routes.HOME) {
+
+            HomeScreen(
+
+                nombreUsuario =
+                    usuarioActual?.nombre
+                        ?: "Usuario",
+
+                onSpeechToTextClick = {
+                    // Próximo paso.
+                },
+
+                onTextToSpeechClick = {
+                    // Próximo paso.
+                },
+
+                onLogoutClick = {
+
+                    usuarioActual = null
+
+                    navController.navigate(
+                        Routes.LOGIN
+                    ) {
+
+                        popUpTo(Routes.HOME) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
