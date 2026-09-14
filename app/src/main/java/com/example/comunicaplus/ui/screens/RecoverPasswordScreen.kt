@@ -26,14 +26,15 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun RecoverPasswordScreen(
     modifier: Modifier = Modifier,
+    onRecoverPasswordClick: (String) -> Boolean = { false },
     onBackToLoginClick: () -> Unit = {}
 ) {
     var correo by remember {
         mutableStateOf("")
     }
 
-    var solicitudEnviada by remember {
-        mutableStateOf(false)
+    var resultadoRecuperacion by remember {
+        mutableStateOf<Boolean?>(null)
     }
 
     Column(
@@ -64,7 +65,7 @@ fun RecoverPasswordScreen(
             value = correo,
             onValueChange = {
                 correo = it
-                solicitudEnviada = false
+                resultadoRecuperacion = null
             },
             label = {
                 Text("Correo electrónico")
@@ -77,7 +78,7 @@ fun RecoverPasswordScreen(
 
         Button(
             onClick = {
-                solicitudEnviada = true
+                resultadoRecuperacion = onRecoverPasswordClick(correo)
             },
             enabled = correo.isNotBlank(),
             modifier = Modifier.fillMaxWidth()
@@ -85,13 +86,21 @@ fun RecoverPasswordScreen(
             Text("Recuperar contraseña")
         }
 
-        if (solicitudEnviada) {
+        resultadoRecuperacion?.let { correoExiste ->
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Si el correo está registrado, se enviarán las instrucciones de recuperación.",
-                color = MaterialTheme.colorScheme.primary
+                text = if (correoExiste) {
+                    "El correo fue encontrado. Se enviarán las instrucciones de recuperación."
+                } else {
+                    "El correo ingresado no se encuentra registrado."
+                },
+                color = if (correoExiste) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.error
+                }
             )
         }
 

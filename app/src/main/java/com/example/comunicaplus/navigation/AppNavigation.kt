@@ -126,6 +126,11 @@ fun AppNavigation(
 
             RecoverPasswordScreen(
 
+                onRecoverPasswordClick = { correo ->
+
+                    UsuarioRepository.existeCorreo(correo)
+                },
+
                 onBackToLoginClick = {
 
                     navController.popBackStack()
@@ -138,34 +143,28 @@ fun AppNavigation(
          */
         composable(Routes.HOME) {
 
-            HomeScreen(
+            val usuario = usuarioActual
 
-                nombreUsuario =
-                    usuarioActual?.nombre
-                        ?: "Usuario",
+            if (usuario != null) {
 
-                onSpeechToTextClick = {
-                    // Próximo paso.
-                },
+                HomeScreen(
+                    usuario = usuario,
 
-                onTextToSpeechClick = {
-                    // Próximo paso.
-                },
+                    onLogoutClick = {
 
-                onLogoutClick = {
+                        usuarioActual = null
 
-                    usuarioActual = null
+                        navController.navigate(
+                            Routes.LOGIN
+                        ) {
 
-                    navController.navigate(
-                        Routes.LOGIN
-                    ) {
-
-                        popUpTo(Routes.HOME) {
-                            inclusive = true
+                            popUpTo(Routes.HOME) {
+                                inclusive = true
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
