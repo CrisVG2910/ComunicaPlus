@@ -10,11 +10,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.example.comunicaplus.navigation.AppNavigation
 import com.example.comunicaplus.ui.theme.ComunicaPlusTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val auth = Firebase.auth
+        val db = Firebase.firestore
 
         enableEdgeToEdge()
 
