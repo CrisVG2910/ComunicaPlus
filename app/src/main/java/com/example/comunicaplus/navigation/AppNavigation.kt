@@ -10,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.comunicaplus.data.UsuarioRepository
 import com.example.comunicaplus.model.Usuario
 import com.example.comunicaplus.ui.screens.HomeScreen
 import com.example.comunicaplus.ui.screens.LoginScreen
 import com.example.comunicaplus.ui.screens.RecoverPasswordScreen
 import com.example.comunicaplus.ui.screens.RegisterScreen
+import com.example.comunicaplus.data.AuthRepository
 
 @Composable
 fun AppNavigation(
@@ -43,28 +43,28 @@ fun AppNavigation(
 
                 onLoginClick = { correo, contrasena ->
 
-                    val usuario = UsuarioRepository
-                        .validarCredenciales(
+                    val resultado =
+                        AuthRepository.iniciarSesion(
                             correo = correo,
                             contrasena = contrasena
                         )
 
-                    if (usuario != null) {
+                    resultado.onSuccess { usuario ->
 
                         usuarioActual = usuario
 
-                        navController.navigate(Routes.HOME) {
+                        navController.navigate(
+                            Routes.HOME
+                        ) {
 
                             popUpTo(Routes.LOGIN) {
                                 inclusive = true
                             }
                         }
+                    }
 
-                        true
-
-                    } else {
-
-                        false
+                    resultado.map {
+                        Unit
                     }
                 },
 
@@ -91,13 +91,23 @@ fun AppNavigation(
 
             RegisterScreen(
 
-                onRegisterClick = { usuario ->
+                onRegisterClick = { usuario, contrasena ->
 
-                    val registrado =
-                        UsuarioRepository
-                            .registrarUsuario(usuario)
+                    val resultado =
+                        AuthRepository.registrarUsuario(
+                            usuario = usuario,
+                            contrasena = contrasena
+                        )
 
-                    if (registrado) {
+                    resultado.onSuccess {
+
+                        /*
+                         * Firebase deja al usuario autenticado
+                         * después de crear la cuenta.
+                         * Cerramos sesión porque nuestro flujo
+                         * vuelve al Login.
+                         */
+                        AuthRepository.cerrarSesion()
 
                         navController.navigate(
                             Routes.LOGIN
@@ -109,7 +119,9 @@ fun AppNavigation(
                         }
                     }
 
-                    registrado
+                    resultado.map {
+                        Unit
+                    }
                 },
 
                 onBackToLoginClick = {
@@ -128,7 +140,8 @@ fun AppNavigation(
 
                 onRecoverPasswordClick = { correo ->
 
-                    UsuarioRepository.existeCorreo(correo)
+                    AuthRepository
+                        .recuperarContrasena(correo)
                 },
 
                 onBackToLoginClick = {
@@ -151,6 +164,8 @@ fun AppNavigation(
                     usuario = usuario,
 
                     onLogoutClick = {
+
+                        AuthRepository.cerrarSesion()
 
                         usuarioActual = null
 

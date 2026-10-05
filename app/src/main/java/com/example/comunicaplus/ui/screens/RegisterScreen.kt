@@ -33,12 +33,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
-    onRegisterClick: (Usuario) -> Boolean = { false },
+    onRegisterClick:
+        suspend (Usuario, String) -> Result<Unit>,
     onBackToLoginClick: () -> Unit = {}
 ) {
     var nombre by remember { mutableStateOf("") }
@@ -75,6 +78,12 @@ fun RegisterScreen(
 
     var mensajeError by remember {
         mutableStateOf<String?>(null)
+    }
+
+    val scope = rememberCoroutineScope()
+
+    var cargando by remember {
+        mutableStateOf(false)
     }
 
     Column(
@@ -288,35 +297,57 @@ fun RegisterScreen(
                         "Las contraseñas no coinciden."
                     }
 
-                    contrasena.length < 4 -> {
-                        "La contraseña debe contener al menos 4 caracteres."
+                    contrasena.length < 6 -> {
+                        "La contraseña debe contener al menos 6 caracteres."
                     }
 
-                    else -> {
+                    else -> null
+                }
 
-                        val usuario = Usuario(
-                            nombre = nombre.trim(),
-                            correo = correo.trim(),
-                            contrasena = contrasena,
-                            nivelAuditivo = nivelAuditivo,
-                            metodoComunicacion = metodoComunicacion,
-                            textoGrande = textoGrande,
-                            vibracion = vibracion
-                        )
+                if (mensajeError == null) {
 
-                        val registroCorrecto = onRegisterClick(usuario)
+                    val usuario = Usuario(
+                        nombre = nombre.trim(),
+                        correo = correo.trim(),
+                        nivelAuditivo = nivelAuditivo,
+                        metodoComunicacion = metodoComunicacion,
+                        textoGrande = textoGrande,
+                        vibracion = vibracion
+                    )
 
-                        if (registroCorrecto) {
-                            null
-                        } else {
-                            "El correo ingresado ya está registrado."
+                    scope.launch {
+
+                        cargando = true
+
+                        val resultado =
+                            onRegisterClick(
+                                usuario,
+                                contrasena
+                            )
+
+                        if (resultado.isFailure) {
+                            mensajeError =
+                                resultado
+                                    .exceptionOrNull()
+                                    ?.message
+                                    ?: "No fue posible crear la cuenta."
                         }
+
+                        cargando = false
                     }
                 }
             },
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Crear cuenta")
+
+            Text(
+                if (cargando) {
+                    "Creando cuenta..."
+                } else {
+                    "Crear cuenta"
+                }
+            )
         }
 
         if (mensajeError != null) {

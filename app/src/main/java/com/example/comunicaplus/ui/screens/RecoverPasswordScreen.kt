@@ -22,11 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun RecoverPasswordScreen(
     modifier: Modifier = Modifier,
-    onRecoverPasswordClick: (String) -> Boolean = { false },
+    onRecoverPasswordClick:
+        suspend (String) -> Result<Unit>,
     onBackToLoginClick: () -> Unit = {}
 ) {
     var correo by remember {
@@ -35,6 +38,20 @@ fun RecoverPasswordScreen(
 
     var resultadoRecuperacion by remember {
         mutableStateOf<Boolean?>(null)
+    }
+
+    val scope = rememberCoroutineScope()
+
+    var solicitudEnviada by remember {
+        mutableStateOf(false)
+    }
+
+    var mensajeError by remember {
+        mutableStateOf<String?>(null)
+    }
+
+    var cargando by remember {
+        mutableStateOf(false)
     }
 
     Column(
@@ -78,12 +95,71 @@ fun RecoverPasswordScreen(
 
         Button(
             onClick = {
-                resultadoRecuperacion = onRecoverPasswordClick(correo)
+
+                scope.launch {
+
+                    cargando = true
+                    mensajeError = null
+                    solicitudEnviada = false
+
+                    val resultado =
+                        onRecoverPasswordClick(
+                            correo
+                        )
+
+                    if (resultado.isSuccess) {
+
+                        solicitudEnviada = true
+
+                    } else {
+
+                        mensajeError =
+                            resultado
+                                .exceptionOrNull()
+                                ?.message
+                                ?: "No fue posible enviar el correo."
+                    }
+
+                    cargando = false
+                }
             },
-            enabled = correo.isNotBlank(),
+            enabled =
+                correo.isNotBlank() &&
+                        !cargando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Recuperar contraseña")
+
+            Text(
+                if (cargando) {
+                    "Enviando..."
+                } else {
+                    "Recuperar contraseña"
+                }
+            )
+        }
+
+        if (solicitudEnviada) {
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = "Si el correo está registrado, se enviarán las instrucciones de recuperación.",
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        mensajeError?.let {
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error
+            )
         }
 
         resultadoRecuperacion?.let { correoExiste ->

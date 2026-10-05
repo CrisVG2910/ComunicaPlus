@@ -25,11 +25,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    onLoginClick: (String, String) -> Boolean = { _, _ -> false },
+    onLoginClick:
+        suspend (String, String) -> Result<Unit>,
     onRegisterClick: () -> Unit = {},
     onRecoverPasswordClick: () -> Unit = {}
 ) {
@@ -37,7 +40,13 @@ fun LoginScreen(
     var contrasena by remember { mutableStateOf("") }
     var recordarUsuario by remember { mutableStateOf(false) }
 
-    var credencialesInvalidas by remember {
+    val scope = rememberCoroutineScope()
+
+    var mensajeError by remember {
+        mutableStateOf<String?>(null)
+    }
+
+    var cargando by remember {
         mutableStateOf(false)
     }
 
@@ -110,28 +119,53 @@ fun LoginScreen(
         Button(
             onClick = {
 
-                val loginCorrecto = onLoginClick(
-                    usuario,
-                    contrasena
-                )
+                scope.launch {
 
-                credencialesInvalidas = !loginCorrecto
+                    cargando = true
+                    mensajeError = null
+
+                    val resultado =
+                        onLoginClick(
+                            usuario,
+                            contrasena
+                        )
+
+                    if (resultado.isFailure) {
+
+                        mensajeError =
+                            resultado
+                                .exceptionOrNull()
+                                ?.message
+                                ?: "No fue posible iniciar sesión."
+                    }
+
+                    cargando = false
+                }
             },
-            enabled = usuario.isNotBlank() &&
-                    contrasena.isNotBlank(),
+            enabled =
+                usuario.isNotBlank() &&
+                        contrasena.isNotBlank() &&
+                        !cargando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Iniciar sesión")
+
+            Text(
+                if (cargando) {
+                    "Iniciando sesión..."
+                } else {
+                    "Iniciar sesión"
+                }
+            )
         }
 
-        if (credencialesInvalidas) {
+        mensajeError?.let {
 
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
 
             Text(
-                text = "Correo o contraseña incorrectos.",
+                text = it,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium
             )
