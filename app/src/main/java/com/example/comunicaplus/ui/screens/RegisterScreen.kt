@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import com.example.comunicaplus.util.UsuarioValidator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -284,25 +285,13 @@ fun RegisterScreen(
         Button(
             onClick = {
 
-                mensajeError = when {
-
-                    nombre.isBlank() ||
-                            correo.isBlank() ||
-                            contrasena.isBlank() ||
-                            confirmarContrasena.isBlank() -> {
-                        "Debes completar todos los campos."
-                    }
-
-                    contrasena != confirmarContrasena -> {
-                        "Las contraseñas no coinciden."
-                    }
-
-                    contrasena.length < 6 -> {
-                        "La contraseña debe contener al menos 6 caracteres."
-                    }
-
-                    else -> null
-                }
+                mensajeError =
+                    UsuarioValidator.validarRegistro(
+                        nombre = nombre,
+                        correo = correo,
+                        contrasena = contrasena,
+                        confirmarContrasena = confirmarContrasena
+                    )
 
                 if (mensajeError == null) {
 
