@@ -32,14 +32,11 @@ fun HomeScreen(
     usuario: Usuario,
     modifier: Modifier = Modifier,
     onEditProfileClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    onEscribirClick: () -> Unit = {},
+    onHablarClick: () -> Unit = {},
+    onBuscarDispositivoClick: () -> Unit = {}
 ) {
-
-    val funcionesProyectadas = listOf(
-        "Voz a texto",
-        "Texto a voz"
-    )
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -88,15 +85,20 @@ fun HomeScreen(
         )
 
         Text(
-            text = "Funciones de comunicación",
-            modifier = Modifier.fillMaxWidth(),
-            fontWeight = FontWeight.Bold
+            text = "Herramientas de comunicación",
+            modifier =
+                Modifier.fillMaxWidth(),
+            fontWeight =
+                FontWeight.Bold
         )
 
         Text(
-            text = "Disponibles en próximas etapas",
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.bodyMedium
+            text =
+                "Selecciona la herramienta que necesitas.",
+            modifier =
+                Modifier.fillMaxWidth(),
+            style =
+                MaterialTheme.typography.bodyMedium
         )
 
         Spacer(
@@ -104,29 +106,99 @@ fun HomeScreen(
         )
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns =
+                GridCells.Fixed(2),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(110.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .height(250.dp),
+            horizontalArrangement =
+                Arrangement.spacedBy(12.dp),
+            verticalArrangement =
+                Arrangement.spacedBy(12.dp),
             userScrollEnabled = false
         ) {
 
-            items(funcionesProyectadas) { funcion ->
+            item {
 
                 Button(
-                    onClick = {},
+                    onClick =
+                        onEscribirClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                ) {
+
+                    Column(
+                        horizontalAlignment =
+                            Alignment.CenterHorizontally
+                    ) {
+
+                        Text(
+                            text = "Escribir",
+                            fontWeight =
+                                FontWeight.Bold
+                        )
+
+                        Text(
+                            text = "Texto a voz",
+                            style =
+                                MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+
+            item {
+
+                Button(
+                    onClick =
+                        onHablarClick,
                     enabled = false,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(90.dp)
+                        .height(100.dp)
                 ) {
 
-                    Text(
-                        text = "$funcion\nPróximamente",
-                        textAlign = TextAlign.Center
-                    )
+                    Column(
+                        horizontalAlignment =
+                            Alignment.CenterHorizontally
+                    ) {
+
+                        Text("Hablar")
+
+                        Text(
+                            text = "Próximamente",
+                            style =
+                                MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+
+            item {
+
+                Button(
+                    onClick =
+                        onBuscarDispositivoClick,
+                    enabled = false,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                ) {
+
+                    Column(
+                        horizontalAlignment =
+                            Alignment.CenterHorizontally
+                    ) {
+
+                        Text("Buscar dispositivo")
+
+                        Text(
+                            text = "Próximamente",
+                            style =
+                                MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }

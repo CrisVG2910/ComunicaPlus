@@ -18,6 +18,7 @@ import com.example.comunicaplus.ui.screens.RegisterScreen
 import com.example.comunicaplus.data.AuthRepository
 import com.example.comunicaplus.data.UsuarioRepository
 import com.example.comunicaplus.ui.screens.EditProfileScreen
+import com.example.comunicaplus.ui.screens.EscribirScreen
 
 @Composable
 fun AppNavigation(
@@ -35,6 +36,20 @@ fun AppNavigation(
         startDestination = Routes.LOGIN,
         modifier = modifier.fillMaxSize()
     ) {
+
+        composable(
+            Routes.ESCRIBIR
+        ) {
+
+            EscribirScreen(
+
+                onBackClick = {
+
+                    navController
+                        .popBackStack()
+                }
+            )
+        }
 
         /*
          * LOGIN
@@ -164,6 +179,21 @@ fun AppNavigation(
 
                 HomeScreen(
                     usuario = usuario,
+
+                    onEscribirClick = {
+
+                        navController.navigate(
+                            Routes.ESCRIBIR
+                        )
+                    },
+
+                    onHablarClick = {
+                        // Próximo hito.
+                    },
+
+                    onBuscarDispositivoClick = {
+                        // Próximo hito.
+                    },
 
                     onEditProfileClick = {
 
