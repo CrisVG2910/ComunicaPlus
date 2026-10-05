@@ -182,7 +182,6 @@ fun HomeScreen(
                 Button(
                     onClick =
                         onBuscarDispositivoClick,
-                    enabled = false,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
@@ -193,12 +192,18 @@ fun HomeScreen(
                             Alignment.CenterHorizontally
                     ) {
 
-                        Text("Buscar dispositivo")
+                        Text(
+                            text = "Buscar dispositivo",
+                            fontWeight =
+                                FontWeight.Bold
+                        )
 
                         Text(
-                            text = "Próximamente",
+                            text = "Geolocalización",
                             style =
-                                MaterialTheme.typography.bodySmall
+                                MaterialTheme
+                                    .typography
+                                    .bodySmall
                         )
                     }
                 }

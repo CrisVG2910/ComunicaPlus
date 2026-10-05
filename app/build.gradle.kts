@@ -65,4 +65,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.11.0")
+    implementation("com.google.android.gms:play-services-location:21.4.0")
 }
