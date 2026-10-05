@@ -153,7 +153,6 @@ fun HomeScreen(
                 Button(
                     onClick =
                         onHablarClick,
-                    enabled = false,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
@@ -164,10 +163,13 @@ fun HomeScreen(
                             Alignment.CenterHorizontally
                     ) {
 
-                        Text("Hablar")
+                        Text(
+                            text = "Hablar",
+                            fontWeight = FontWeight.Bold
+                        )
 
                         Text(
-                            text = "Próximamente",
+                            text = "Voz a texto",
                             style =
                                 MaterialTheme.typography.bodySmall
                         )
