@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.auth.EmailAuthProvider
 
 object AuthRepository {
 
@@ -111,6 +112,83 @@ object AuthRepository {
             auth.sendPasswordResetEmail(
                 correo.trim()
             ).await()
+
+            Result.success(Unit)
+
+        } catch (e: Exception) {
+
+            Result.failure(
+                mapearError(e)
+            )
+        }
+    }
+
+    suspend fun eliminarCuenta(
+        contrasena: String
+    ): Result<Unit> {
+
+        return try {
+
+            val firebaseUser =
+                auth.currentUser
+                    ?: throw IllegalStateException(
+                        "No existe una sesión activa."
+                    )
+
+            val correo =
+                firebaseUser.email
+                    ?: throw IllegalStateException(
+                        "No se pudo obtener el correo del usuario."
+                    )
+
+            val uid = firebaseUser.uid
+
+            /*
+             * Firebase exige autenticación reciente
+             * para acciones sensibles como eliminar
+             * una cuenta.
+             */
+            val credencial =
+                EmailAuthProvider.getCredential(
+                    correo,
+                    contrasena
+                )
+
+            firebaseUser
+                .reauthenticate(credencial)
+                .await()
+
+            /*
+             * Guardamos temporalmente el perfil
+             * por si el borrado de Authentication falla.
+             */
+            val perfil =
+                UsuarioRepository
+                    .obtenerUsuario(uid)
+
+            UsuarioRepository
+                .eliminarUsuario(uid)
+
+            try {
+
+                firebaseUser
+                    .delete()
+                    .await()
+
+            } catch (e: Exception) {
+
+                /*
+                 * Si Authentication no pudo eliminarse,
+                 * restauramos el perfil Firestore.
+                 */
+                if (perfil != null) {
+
+                    UsuarioRepository
+                        .crearUsuario(perfil)
+                }
+
+                throw e
+            }
 
             Result.success(Unit)
 

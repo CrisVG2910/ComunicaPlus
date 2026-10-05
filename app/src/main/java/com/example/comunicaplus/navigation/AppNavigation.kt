@@ -16,6 +16,8 @@ import com.example.comunicaplus.ui.screens.LoginScreen
 import com.example.comunicaplus.ui.screens.RecoverPasswordScreen
 import com.example.comunicaplus.ui.screens.RegisterScreen
 import com.example.comunicaplus.data.AuthRepository
+import com.example.comunicaplus.data.UsuarioRepository
+import com.example.comunicaplus.ui.screens.EditProfileScreen
 
 @Composable
 fun AppNavigation(
@@ -163,9 +165,17 @@ fun AppNavigation(
                 HomeScreen(
                     usuario = usuario,
 
+                    onEditProfileClick = {
+
+                        navController.navigate(
+                            Routes.EDIT_PROFILE
+                        )
+                    },
+
                     onLogoutClick = {
 
-                        AuthRepository.cerrarSesion()
+                        AuthRepository
+                            .cerrarSesion()
 
                         usuarioActual = null
 
@@ -177,6 +187,78 @@ fun AppNavigation(
                                 inclusive = true
                             }
                         }
+                    }
+                )
+            }
+        }
+
+        composable(
+            Routes.EDIT_PROFILE
+        ) {
+
+            val usuario = usuarioActual
+
+            if (usuario != null) {
+
+                EditProfileScreen(
+                    usuario = usuario,
+
+                    onSaveClick = {
+                            usuarioActualizado ->
+
+                        try {
+
+                            UsuarioRepository
+                                .actualizarUsuario(
+                                    usuarioActualizado
+                                )
+
+                            usuarioActual =
+                                usuarioActualizado
+
+                            navController
+                                .popBackStack()
+
+                            Result.success(Unit)
+
+                        } catch (e: Exception) {
+
+                            Result.failure(e)
+                        }
+                    },
+
+                    onDeleteAccountClick = {
+                            contrasena ->
+
+                        val resultado =
+                            AuthRepository
+                                .eliminarCuenta(
+                                    contrasena
+                                )
+
+                        resultado.onSuccess {
+
+                            usuarioActual = null
+
+                            navController.navigate(
+                                Routes.LOGIN
+                            ) {
+
+                                popUpTo(
+                                    Routes.LOGIN
+                                ) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+
+                        resultado
+                    },
+
+                    onBackClick = {
+
+                        navController
+                            .popBackStack()
                     }
                 )
             }

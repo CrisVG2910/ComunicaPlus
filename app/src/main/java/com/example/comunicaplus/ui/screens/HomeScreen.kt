@@ -31,6 +31,7 @@ import com.example.comunicaplus.model.Usuario
 fun HomeScreen(
     usuario: Usuario,
     modifier: Modifier = Modifier,
+    onEditProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
 
@@ -132,6 +133,17 @@ fun HomeScreen(
 
         Spacer(
             modifier = Modifier.height(24.dp)
+        )
+
+        OutlinedButton(
+            onClick = onEditProfileClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Editar perfil")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
         )
 
         OutlinedButton(
